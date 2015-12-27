@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>iHypno</title>
+    <style>
+    html, body{
+        width: 100%;
+        height: 100%;
+        border: 0;
+        margin: 0;
+        padding: 0;
+    }
+    </style>
+</head>
+<body>
+    <canvas width="100" height="100"></canvas>
+    <script>
+
+function distance(a,b){
+    return Math.sqrt(((a) *( a)) + ((b) * (b)));
+}
+
+var DEGREE = Math.PI / 180;
+var screenRect = document.body.getBoundingClientRect();
+var canvas = document.querySelector('canvas');
+canvas.setAttribute('width', screenRect.width);
+canvas.setAttribute('height', screenRect.height);
+var context = canvas.getContext('2d');
+var arms_inner = [];
+var arms_outer = [];
+var eighth;
+var eighth = Math.PI / 8.0;
+var rot = Math.PI / 180.0;
+var windowWidth = screenRect.width;
+var windowHeight = screenRect.height;
+var maxDim = Math.max(windowWidth, windowHeight);
+var minDim = Math.min(windowWidth, windowHeight);
+var center_x = windowWidth / 2;
+var center_y = windowHeight / 2;
+var frameCount = 0;
+var previous_time = 0;
+var speed = 2;
+var radius = minDim / 3;
+
+function init(){
+    var dt;
+    var r;
+    var idx = 0;
+    // define outer arms
+
+
+    for (dt = 0; dt < 4; dt++){
+        theta = (Math.PI / 2.0) * dt;
+        for(r = 0; r < maxDim; r+=2){
+            arms_outer[idx] = [r * Math.cos(theta - eighth + rot * r), r * Math.sin(theta - eighth + rot * r)];
+            idx++;
+        }
+        for(r = maxDim; r > 0; r -= 2){
+            arms_outer[idx] = [r * Math.cos(theta + eighth + rot * r), r * Math.sin(theta + eighth + rot * r)];
+            idx++;
+        }
+    }
+    idx = 0;
+    // define inner arms
+    for (dt = 0; dt < 4; dt++){
+        theta = (Math.PI / 2.0) * dt;
+        for(r = 0; r < maxDim; r += 2){
+            arms_inner[idx] = [r * Math.cos(theta - eighth - rot * r), r * Math.sin(theta - eighth - rot * r)];
+            idx++;
+        }
+        for(r = maxDim; r > 0; r -= 2){
+            arms_inner[idx] = [r * Math.cos(theta + eighth - rot * r), r * Math.sin(theta + eighth - rot * r)];
+            idx++;
+        }
+    }
+}
+
+var ColorCycler = function(){
+    this.hue = 0;
+};
+ColorCycler.prototype.nextColor = function(){
+    this.hue = this.hue + .1 % 360;
+    return this.currentColor();
+};
+ColorCycler.prototype.currentColor = function(){
+    return 'hsl(' + this.hue + ', 75%, 50%)';
+};
+ColorCycler.prototype.complement = function(){
+    return 'hsl(' + (this.hue + 180) + ', 75%, 50%)';
+};
+
+var colorCycler = new ColorCycler();
+
+
+function drawFrame(){
+    frameCount += 1;
+    colorCycler.nextColor();
+    var rotation = DEGREE * speed ;
+    /* paint background */
+    context.fillStyle = colorCycler.complement();
+    context.fillRect(0,0,windowWidth, windowHeight);
+    /* Outer spiral */
+    if (radius < windowHeight){
+        context.save();
+        context.translate(center_x, center_y);
+        context.rotate(-rotation * frameCount);
+        context.beginPath();
+        context.fillStyle = colorCycler.currentColor();
+        arms_outer.forEach(function(pt, idx){
+            if (idx){
+                context.lineTo(pt[0], pt[1]);
+            }else{
+                context.moveTo(pt[0], pt[1]);
+            }
+        });
+        context.fill();
+        context.restore();
+    }
+    if (radius > 0){
+        /* inner circle */
+        context.save();
+        context.translate(center_x, center_y);
+        context.beginPath();
+        context.fillStyle = colorCycler.complement();
+        context.arc(0,0, radius, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+        /* inner spiral */
+        context.save();
+        context.translate(center_x, center_y);
+        context.rotate(rotation * frameCount);
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.clip();
+        context.beginPath();
+        context.fillStyle = colorCycler.currentColor();
+        arms_inner.forEach(function(pt, idx){
+            if (idx){
+                context.lineTo(pt[0], pt[1]);
+            }else{
+                context.moveTo(pt[0], pt[1]);
+            }
+        });
+        // context.closePath();
+        context.fill();
+        context.restore();
+    }
+    requestAnimationFrame(drawFrame);
+}
+
+init();
+requestAnimationFrame(drawFrame);
+    </script>
+</body>
+</html>
