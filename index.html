@@ -84,9 +84,11 @@ ColorCycler.prototype.nextColor = function(){
     return this.currentColor();
 };
 ColorCycler.prototype.currentColor = function(){
+    return 'black';
     return 'hsl(' + this.hue + ', 75%, 50%)';
 };
 ColorCycler.prototype.complement = function(){
+    return 'white';
     return 'hsl(' + (this.hue + 180) + ', 75%, 50%)';
 };
 
