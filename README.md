@@ -1,2 +1,3 @@
-# ihypno
-Mind control for the rest of us
+Moved project to Codeberg: https://codeberg.org/dethe/ihypno/ for all the reasons given by the [Give Up Github](https://sfconservancy.org/GiveUpGitHub/) campaign.
+
+Visible on my site: https://livingcode.org/projects/ihypno/
